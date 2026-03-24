@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pixel Lab Course</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      height: 100vh;
+    }
+
+    .panel {
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .left { width: 25%; background: #1e293b; }
+    .middle { width: 35%; background: #020617; }
+    .right { width: 40%; background: #020617; }
+
+    textarea {
+      width: 100%;
+      height: 300px;
+      background: #020617;
+      color: #38bdf8;
+      border: 1px solid #334155;
+      padding: 10px;
+      font-family: monospace;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #22c55e;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 30px);
+      gap: 4px;
+      margin-top: 20px;
+    }
+
+    .cell {
+      width: 30px;
+      height: 30px;
+      background: white;
+      border-radius: 4px;
+    }
+
+    #output {
+      margin-top: 20px;
+      background: black;
+      padding: 10px;
+      height: 120px;
+      overflow-y: auto;
+      color: #22c55e;
+      font-family: monospace;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="panel left">
+  <h2 id="title">Assignment</h2>
+  <p id="description"></p>
+  <button onclick="nextLevel()">Next ▶</button>
+</div>
+
+<div class="panel middle">
+  <h2>💻 Code</h2>
+  <textarea id="code"></textarea>
+  <button onclick="runCode()">Run</button>
+</div>
+
+<div class="panel right">
+  <h2>🧱 Grid</h2>
+  <div class="grid" id="grid"></div>
+
+  <h2>📟 Output</h2>
+  <div id="output"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<script>
+let grid = document.getElementById("grid");
+let output = document.getElementById("output");
+let codeBox = document.getElementById("code");
+
+let cells = [];
+let lastOutput = "";
+
+function createGrid() {
+  grid.innerHTML = "";
+  cells = [];
+  for (let i = 0; i < 100; i++) {
+    let div = document.createElement("div");
+    div.className = "cell";
+    grid.appendChild(div);
+    cells.push(div);
+  }
+}
+
+function print(msg) {
+  lastOutput += msg + "\n";
+  output.innerHTML += msg + "<br>";
+}
+
+function clearOutput() {
+  output.innerHTML = "";
+  lastOutput = "";
+}
+
+function checkAllRed() {
+  return cells.every(c => c.style.background === "red");
+}
+
+/* 🎯 LEVELS */
+let levels = [
+{
+  title: "Variables",
+  desc: "Create a variable called color and use it to color the first cell red.",
+  code:
+`color = "blue";
+cells[0].style.background = color;`,
+  check: () => cells[0].style.background === "red"
+},
+
+{
+  title: "Loops",
+  desc: "Fix the loop so ALL cells turn red.",
+  code:
+`for (let i = 0; i < 10; i++) {
+  cells[i].style.background = "red";
+}`,
+  check: () => checkAllRed()
+},
+
+{
+  title: "Arrays & Loop",
+  desc: "Color the first 5 cells using a loop.",
+  code:
+`for (let i = 0; i < 50; i++) {
+  cells[i].style.background = "blue";
+}`,
+  check: () => cells.slice(0,5).every(c => c.style.background === "blue")
+},
+
+{
+  title: "Strings",
+  desc: "Print: Hello Student",
+  code:
+`name = "Student";
+print("Hello");`,
+  check: () => lastOutput.includes("Hello Student")
+},
+
+];
+
+let currentLevel = 0;
+
+function loadLevel() {
+  let level = levels[currentLevel];
+  document.getElementById("title").innerText = level.title;
+  document.getElementById("description").innerText = level.desc;
+  codeBox.value = level.code;
+  createGrid();
+  clearOutput();
+}
+
+function runCode() {
+  createGrid();
+  clearOutput();
+
+  try {
+    eval(codeBox.value);
+
+    if (levels[currentLevel].check()) {
+      print("🎉 Correct!");
+      confetti();
+    } else {
+      print("❌ Not quite right");
+    }
+
+  } catch (e) {
+    print("Error: " + e.message);
+  }
+}
+
+function nextLevel() {
+  currentLevel++;
+  if (currentLevel >= levels.length) currentLevel = 0;
+  loadLevel();
+}
+
+loadLevel();
+</script>
+
+</body>
+</html>
